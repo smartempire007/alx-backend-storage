@@ -1,5 +1,5 @@
--- Write an SQL script that create a table named "users" with the 
--- following fields:
+-- Write an SQL script that create a table named "users" 
+-- with the following fields:
 -- id, name, email
 
 CREATE TABLE IF NOT EXISTS users (
