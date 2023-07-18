@@ -17,22 +17,19 @@ You can use this dump as data sample: dump.zip
 import pymongo
 from pymongo import MongoClient
 
-
-def log_nginx_stats(mongo_collection):
-    '''provides some stats about Nginx logs stored in MongoDB'''
-    # client = MongoClient('mongodb://localhost:27017')
-    print("{} logs".format(mongo_collection.count_documents({})))
-
-    print("Methods:")
-    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
-        print("\tmethod {}: {}".format(
-            method, mongo_collection.count_documents({"method": method})))
-
-    print("{} status check".format(mongo_collection.count_documents(
-        {"method": "GET", "path": "/status"})))
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    '''Prints the log stats in nginx collection'''
     client = MongoClient('mongodb://localhost:27017')
-    nginx_collection = client.logs.nginx
-    log_nginx_stats(nginx_collection)
+    collection = client.logs.nginx
+
+    print(f'{collection.estimated_document_count()} logs')
+
+    methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+    print('Methods:')
+
+    for req in methods:
+        print('\tmethods {}: {}'.format(req,
+              collection.count_documents({'method': req})))
+
+    print('{} status check'.format(collection.count_documents(
+          {'method': 'GET', 'path': '/status'})))
