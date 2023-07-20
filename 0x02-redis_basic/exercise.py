@@ -30,7 +30,7 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
-    '''Stores the history of inputs and outputs for a 
+    '''Stores the history of inputs and outputs for a
     particular function'''
     input_list_key = method.__qualname__ + ":inputs"
     output_list_key = method.__qualname__ + ":outputs"
@@ -78,7 +78,8 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
+    def get(self, key: str, fn: Optional[Callable]
+            = None) -> Union[str, bytes, int, float]:
         '''Get data from Redis'''
         data = self._redis.get(key)
         if fn is not None:
