@@ -16,29 +16,37 @@ and test your caching.
 Bonus: implement this use case with decorators.
 '''
 import redis
-from typing import Union, Optional, Callable
-from requests import get
+import requests
 from functools import wraps
+from typing import Callable
 
 
-def track_page_count(method: Callable) -> Callable:
-    '''Tracks the number of times a URL is accessed'''
+redis_store = redis.Redis()
+'''The module-level Redis instance.
+'''
+
+
+def data_cacher(method: Callable) -> Callable:
+    '''Caches the output of fetched data.
+    '''
     @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        '''Wrapper function'''
-        cache = redis.Redis()
-        url = args[0]
-        key = "count:{}".format(url)
-        cache.incr(key)
-        page = cache.get(url)
-        if page is not None:
-            return page.decode('utf-8')
-        page = method(self, *args, **kwargs)
-        cache.setex(url, 10, page)
-        return page
-    return wrapper
+    def invoker(url) -> str:
+        '''The wrapper function for caching the output.
+        '''
+        redis_store.incr(f'count:{url}')
+        result = redis_store.get(f'result:{url}')
+        if result:
+            return result.decode('utf-8')
+        result = method(url)
+        redis_store.set(f'count:{url}', 0)
+        redis_store.setex(f'result:{url}', 10, result)
+        return result
+    return invoker
 
 
+@data_cacher
 def get_page(url: str) -> str:
-    '''Gets the HTML content of a particular URL'''
-    return get(url).text
+    '''Returns the content of a URL after caching the request's response,
+    and tracking the request.
+    '''
+    return requests.get(url).text
